@@ -46,7 +46,7 @@
 
 // ############################### SERIAL DEBUG ###############################
 
-#define DEBUG_SERIAL_USART3         // right sensor board cable, disable if I2C (nunchuck or lcd) is used!
+#define DEBUG_SERIAL_USART2         // right sensor board cable, disable if I2C (nunchuck or lcd) is used!
 #define DEBUG_BAUD       115200     // UART baud rate
 //#define DEBUG_SERIAL_SERVOTERM      // Software for plotting graphs: https://github.com/STMBL/Servoterm-app
 #define DEBUG_SERIAL_ASCII          // "1:345 2:1337 3:0 4:0 5:0 6:0 7:0 8:0\r\n"
@@ -73,7 +73,7 @@
 
 // ###### CONTROL VIA NINTENDO NUNCHUCK ######
 // left sensor board cable. keep cable short, use shielded cable, use ferrits, stabalize voltage in nunchuck, use the right one of the 2 types of nunchucks, add i2c pullups. use original nunchuck. most clones does not work very well.
-//#define CONTROL_NUNCHUCK            // use nunchuck as input. disable DEBUG_SERIAL_USART3!
+#define CONTROL_NUNCHUCK            // use nunchuck as input. disable DEBUG_SERIAL_USART3!
 
 // ###### MOTOR TEST MODE ######
 // slowly move both wheels forward and backward, ignoring all inputs
@@ -91,7 +91,7 @@
 // - weakr and weakl: field weakening for extra boost at high speed (speedR > 700 and speedL > 700). 0 to ~400
 
 #define FILTER              0.1  // lower value == softer filter. do not use values <0.01, you will get float precision issues.
-#define SPEED_COEFFICIENT   0.5  // higher value == stronger. 0.0 to ~2.0?
+#define SPEED_COEFFICIENT   2  // higher value == stronger. 0.0 to ~2.0?
 #define STEER_COEFFICIENT   0.5  // higher value == stronger. if you do not want any steering, set it to 0.0; 0.0 to 1.0
 #define INVERT_R_DIRECTION
 #define INVERT_L_DIRECTION
