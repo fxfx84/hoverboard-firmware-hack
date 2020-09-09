@@ -245,16 +245,13 @@ int main(void) {
     // ####### LOW-PASS FILTER #######
     steer = steer * (1.0 - FILTER) + cmd1 * FILTER;
     speed = speed * (1.0 - FILTER) + cmd2 * FILTER;
-
+    #ifdef ADDITIONAL_CODE
+      ADDITIONAL_CODE;
+    #endif
 
     // ####### MIXER #######
     speedR = CLAMP(speed * SPEED_COEFFICIENT -  steer * STEER_COEFFICIENT, -1000, 1000);
     speedL = CLAMP(speed * SPEED_COEFFICIENT +  steer * STEER_COEFFICIENT, -1000, 1000);
-
-
-    #ifdef ADDITIONAL_CODE
-      ADDITIONAL_CODE;
-    #endif
 
 
     // ####### SET OUTPUTS #######
@@ -273,7 +270,10 @@ int main(void) {
 
     lastSpeedL = speedL;
     lastSpeedR = speedR;
-
+	  
+    #ifdef ADDITIONAL_CODE_2
+      ADDITIONAL_CODE_2;
+    #endif
 
     if (main_loop_counter % 25 == 0) {
       // ####### CALC BOARD TEMPERATURE #######
