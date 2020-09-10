@@ -10,7 +10,10 @@ volatile int posr = 0;
 volatile int pwml = 0;
 volatile int pwmr = 0;
 volatile int weakl = 0;
-volatile int weakr = 0;
+volatile int weakr = 0; 
+volatile int posSVl = 0; 
+volatile int posSVr = 0; 
+
 
 volatile uint8_t halll_old=0;
 volatile uint8_t hallr_old=0;
@@ -44,6 +47,26 @@ const uint8_t hall_to_pos[8] = {
     3,
     0,
 };
+//is exatly doing what expected reusing the old one
+//uint8_t halll = hall_ul * 1 + hall_vl * 2 + hall_wl * 4;
+//          Sect2
+//    010->2     011->3    
+//     S3           Sect1
+//110->6              001->1
+//      S4              S6
+//    100->4      101->5
+//            S5
+//const uint8_t hall_to_pos_SV[8] = { // tryng to use space vector convetnion counterclockwise 0 at fully right position when u is active.
+//    0,
+//    0,//dec=1 Sect 1
+//    2,//dec=2 Sect 3
+//    1,//dec=3 sect 2
+//    4,//dec=4 Sect 5
+//    5,//dec=5 sect 6
+//    3,//dec=6 sect 4
+//    0,//
+//};
+
 
 inline void blockPWM(int pwm, int pos, int *u, int *v, int *w) {
   switch(pos) {
@@ -132,39 +155,39 @@ inline void blockPhaseCurrent(int pos, int u, int v, int *q) {
 
 inline void calcDeg(int pos, *deg) {
   switch(pos) {
-    case 0:
+    case 0: // Sector 1 u=1 v = 0 w = 0
           *deg = 0;
       // *u = 0;
       // *v = pwm;
       // *w = -pwm;
       break;
-    case 1:
-            *deg
-      *q = u;
+    case 1: // Sector 2 u=1 v = 1 w = 0
+          *deg=60;
+     // *q = u;
       // *u = -pwm;
       // *v = pwm;
       // *w = 0;
       break;
-    case 2:
-      *q = u;
+    case 2: // Sector 3 u=0 v = 1 w = 0
+      *deg = 120;
       // *u = -pwm;
       // *v = 0;
       // *w = pwm;
       break;
-    case 3:
-      *q = v;
+    case 3: // Sector 4 u=0 v = 1 w = 1
+      *deg = 180;
       // *u = 0;
       // *v = -pwm;
       // *w = pwm;
       break;
-    case 4:
-      *q = v;
+    case 4: // Sector 5 u=0 v = 0 w = 1
+      *deg = 240;
       // *u = pwm;
       // *v = -pwm;
       // *w = 0;
       break;
-    case 5:
-      *q = -(u - v);
+    case 5: // Sector 5 u=1 v = 0 w = 1
+       *deg = 300;
       // *u = pwm;
       // *v = 0;
       // *w = -pwm;
@@ -249,9 +272,10 @@ void DMA1_Channel1_IRQHandler() {
   uint8_t hall_wr = !(RIGHT_HALL_W_PORT->IDR & RIGHT_HALL_W_PIN);
 
   uint8_t halll = hall_ul * 1 + hall_vl * 2 + hall_wl * 4;
-    // a 1000 rpm deve fare 6000 deg/s se la funzione la chiamo ogni 1k al sec
+    // a 1000 rpm deve fare 6000 deg/s se la funzione la chiamo ogni 1k al sec    
     if (halll_old!= halll) {
-        calcDeg(halll,&posdegl);
+        posSVl= hall_to_pos[halll];
+        calcDeg(posSVl, &posdegl);
         deltadegl=6/deltatl;
         deltatl=0;
         halll_old=halll;
