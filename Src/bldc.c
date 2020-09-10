@@ -6,15 +6,20 @@
 
 
 volatile int posl = 0;
-volatile int posdegl = 0;
-volatile int posdegr = 0;
 volatile int posr = 0;
 volatile int pwml = 0;
 volatile int pwmr = 0;
 volatile int weakl = 0;
 volatile int weakr = 0;
+
 volatile uint8_t halll_old=0;
 volatile uint8_t hallr_old=0;
+volatile float posdegl = 0;
+volatile float posdegr = 0;
+volatile int deltatl=0;
+volatile int deltatr=0;
+volatile float deltadegl=0.1;
+volatile float deltadegr=0.1;
 
 extern volatile int speed;
 
@@ -125,6 +130,53 @@ inline void blockPhaseCurrent(int pos, int u, int v, int *q) {
   }
 }
 
+inline void calcDeg(int pos, *deg) {
+  switch(pos) {
+    case 0:
+          *deg = 0;
+      // *u = 0;
+      // *v = pwm;
+      // *w = -pwm;
+      break;
+    case 1:
+            *deg
+      *q = u;
+      // *u = -pwm;
+      // *v = pwm;
+      // *w = 0;
+      break;
+    case 2:
+      *q = u;
+      // *u = -pwm;
+      // *v = 0;
+      // *w = pwm;
+      break;
+    case 3:
+      *q = v;
+      // *u = 0;
+      // *v = -pwm;
+      // *w = pwm;
+      break;
+    case 4:
+      *q = v;
+      // *u = pwm;
+      // *v = -pwm;
+      // *w = 0;
+      break;
+    case 5:
+      *q = -(u - v);
+      // *u = pwm;
+      // *v = 0;
+      // *w = -pwm;
+      break;
+    default:
+      *deg = 0;
+      // *u = 0;
+      // *v = 0;
+      // *w = 0;
+  }
+}
+
 uint32_t buzzerTimer        = 0;
 
 int offsetcount = 0;
@@ -197,11 +249,19 @@ void DMA1_Channel1_IRQHandler() {
   uint8_t hall_wr = !(RIGHT_HALL_W_PORT->IDR & RIGHT_HALL_W_PIN);
 
   uint8_t halll = hall_ul * 1 + hall_vl * 2 + hall_wl * 4;
+    // a 1000 rpm deve fare 6000 deg/s se la funzione la chiamo ogni 1k al sec
     if (halll_old!= halll) {
-        posdegl=hall_to_posdeg[halll];
+        calcDeg(halll,&posdegl);
+        deltadegl=6/deltatl;
+        deltatl=0;
+        halll_old=halll;
     }
-    else{
-        posdegl+=deltadeg;
+    else {
+         if (buzzerTimer % 100 == 0) { // chiamo l'update 1000 volte al sec
+            posdegl+=deltadegl;
+            deltatl+=1; // viene in millisec
+            deltatl=CLAMP(deltatl,0,2147483646);
+         }
     }
        
             
