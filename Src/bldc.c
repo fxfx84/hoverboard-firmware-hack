@@ -6,11 +6,15 @@
 
 
 volatile int posl = 0;
+volatile int posdegl = 0;
+volatile int posdegr = 0;
 volatile int posr = 0;
 volatile int pwml = 0;
 volatile int pwmr = 0;
 volatile int weakl = 0;
 volatile int weakr = 0;
+volatile uint8_t halll_old=0;
+volatile uint8_t hallr_old=0;
 
 extern volatile int speed;
 
@@ -193,6 +197,14 @@ void DMA1_Channel1_IRQHandler() {
   uint8_t hall_wr = !(RIGHT_HALL_W_PORT->IDR & RIGHT_HALL_W_PIN);
 
   uint8_t halll = hall_ul * 1 + hall_vl * 2 + hall_wl * 4;
+    if (halll_old!= halll) {
+        posdegl=hall_to_posdeg[halll];
+    }
+    else{
+        posdegl+=deltadeg;
+    }
+       
+            
   posl          = hall_to_pos[halll];
   posl += 2;
   posl %= 6;
