@@ -13,7 +13,7 @@ volatile int weakl = 0;
 volatile int weakr = 0; 
 volatile int posSVl = 0; 
 volatile int posSVr = 0; 
-
+volatile int direction=1;
 
 volatile uint8_t halll_old=0;
 volatile uint8_t hallr_old=0;
@@ -274,7 +274,19 @@ void DMA1_Channel1_IRQHandler() {
   uint8_t halll = hall_ul * 1 + hall_vl * 2 + hall_wl * 4;
     // a 1000 rpm deve fare 6000 deg/s se la funzione la chiamo ogni 1k al sec    
     if (halll_old!= halll) {
+        posSVl_old=posSVl;
+        
         posSVl= hall_to_pos[halll];
+        if  (posSVl >= posSVl_old ){
+                if (posSVl_old ==0 && posSVl>=180){
+                direction=-1;
+                }
+                else {
+                    direction=1;
+                }
+          else{
+            direction=-1;
+          }
         calcDeg(posSVl, &posdegl);
         deltadegl=6/deltatl;
         deltatl=0;
@@ -282,7 +294,12 @@ void DMA1_Channel1_IRQHandler() {
     }
     else {
          if (buzzerTimer % 100 == 0) { // chiamo l'update 1000 volte al sec
-            posdegl+=deltadegl;
+             if (direction=1){
+            posdegl+=deltadegl;}
+             else{
+              posdegl-=deltadegl;
+             }
+             posdegl=CLAMP(posdegl,0,360)
             deltatl+=1; // viene in millisec
             deltatl=CLAMP(deltatl,0,2147483646);
          }
